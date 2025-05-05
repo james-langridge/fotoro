@@ -4,7 +4,9 @@ import {
   DeleteObjectCommand,
   ListObjectsCommand,
   PutObjectCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { StorageListResponse, generateStorageId } from '.';
 import { formatBytesToMB } from '@/utility/number';
 
@@ -31,7 +33,7 @@ export const isUrlFromAwsS3 = (url?: string) =>
   AWS_S3_BASE_URL && url?.startsWith(AWS_S3_BASE_URL);
 
 export const awsS3PutObjectCommandForKey = (Key: string) =>
-  new PutObjectCommand({ Bucket: AWS_S3_BUCKET, Key, ACL: 'public-read' });
+  new PutObjectCommand({ Bucket: AWS_S3_BUCKET, Key });
 
 export const awsS3Put = async (
   file: Buffer,
@@ -41,7 +43,6 @@ export const awsS3Put = async (
     Bucket: AWS_S3_BUCKET,
     Key: fileName,
     Body: file,
-    ACL: 'public-read',
   }))
     .then(() => urlForKey(fileName));
 
@@ -59,7 +60,6 @@ export const awsS3Copy = async (
     Bucket: AWS_S3_BUCKET,
     CopySource: fileNameSource,
     Key,
-    ACL: 'public-read',
   }))
     .then(() => urlForKey(fileNameDestination));
 };
@@ -83,4 +83,17 @@ export const awsS3Delete = async (Key: string) => {
     Bucket: AWS_S3_BUCKET,
     Key,
   }));
+};
+
+export const getPresignedUrl = async (key: string, expiresIn = 3600) => {
+  if (key.startsWith('http')) {
+    key = key.split('/').pop() || '';
+  }
+
+  const command = new GetObjectCommand({
+    Bucket: AWS_S3_BUCKET,
+    Key: key,
+  });
+
+  return getSignedUrl(awsS3Client(), command, { expiresIn });
 };
