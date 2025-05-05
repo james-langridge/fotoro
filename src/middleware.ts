@@ -1,6 +1,5 @@
-import { auth } from './src/auth/server';
-import { NextRequest, NextResponse } from 'next/server';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 import {
   PATH_ADMIN,
   PATH_ADMIN_PHOTOS,
@@ -8,9 +7,28 @@ import {
   PATH_OG_SAMPLE,
   PREFIX_PHOTO,
   PREFIX_TAG,
-} from './src/app/paths';
+} from './app/paths';
 
-export default function middleware(req: NextRequest, res:NextResponse) {
+const isPublicRoute = createRouteMatcher([
+  '/api$',
+  '/api/auth(.*)',
+  '/_next/static(.*)',
+  '/_next/image(.*)',
+  '/favicon.ico$',
+  '/favicons/(.*)',
+  '/grid$',
+  '/feed$',
+  '/$',
+  '/home-image$',
+  '/template-image$',
+  '/template-image-tight$',
+  '/template-url$',
+  // Clerk's authentication routes
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+]);
+
+export default clerkMiddleware(async (auth, req) => {
   const pathname = req.nextUrl.pathname;
 
   if (pathname === PATH_ADMIN) {
@@ -33,25 +51,13 @@ export default function middleware(req: NextRequest, res:NextResponse) {
     ));
   }
 
-  return auth(
-    req as unknown as NextApiRequest,
-    res as unknown as NextApiResponse,
-  );
-}
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
+
+  return NextResponse.next();
+});
 
 export const config = {
-  // Excludes:
-  // - /api + /api/auth*
-  // - /_next/static*
-  // - /_next/image*
-  // - /favicon.ico + /favicons/*
-  // - /grid
-  // - /feed
-  // - / (root)
-  // - /home-image
-  // - /template-image
-  // - /template-image-tight
-  // - /template-url
-  // eslint-disable-next-line max-len
   matcher: ['/((?!api$|api/auth|_next/static|_next/image|favicon.ico$|favicons/|grid$|feed$|home-image$|template-image$|template-image-tight$|template-url$|$).*)'],
 };
