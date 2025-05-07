@@ -14,6 +14,8 @@ export default function ImageWithFallback({
   blurDataURL,
   blurCompatibilityLevel = 'low',
   src,
+  width,
+  height,
   ...props
 }: ImageProps & {
   blurCompatibilityLevel?: 'none' | 'low' | 'high'
@@ -31,44 +33,86 @@ export default function ImageWithFallback({
   const [hideFallback, setHideFallback] = useState(false);
 
   const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // const isS3Image = typeof src === 'string' && storageTypeFromUrl(src) === 'aws-s3';
+  useEffect(() => {
+    // Get the image and container elements
+    const imageElement = imgRef.current;
+    const containerElement = containerRef.current;
 
-  // const fetchPresignedUrl = useCallback(async () => {
-  //   if (isS3Image) {
-  //     try {
-  //       const fileName = fileNameForStorageUrl(src);
-  //       const response = await fetch(`/api/presigned-url/${encodeURIComponent(fileName)}`);
-  //
-  //       if (response.ok) {
-  //         const url = await response.text();
-  //         setPresignedSrc(url);
-  //       } else {
-  //         console.error('Failed to get pre-signed URL:', await response.text());
-  //         setDidError(true);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching pre-signed URL:', error);
-  //       setDidError(true);
-  //     }
-  //   } else {
-  //     setPresignedSrc(src as string);
-  //   }
-  // }, [isS3Image, src]);
+    if (!imageElement || !containerElement) return;
 
-  // Fetch pre-signed URL for S3 images
-  // useEffect(() => {
-  //   fetchPresignedUrl();
-  // }, [fetchPresignedUrl, src]);
-  //
-  // const onError = useCallback(async () => {
-  //   if (isS3Image) {
-  //     console.log('Image load failed, attempting to refresh pre-signed URL');
-  //     await fetchPresignedUrl();
-  //   } else {
-  //     setDidError(true);
-  //   }
-  // }, [isS3Image, fetchPresignedUrl]);
+    // Function to prevent default behavior
+    const preventDefault = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
+    // Prevent context menu
+    const handleContextMenu = (e: MouseEvent) => preventDefault(e);
+
+    // Touch event handlers - critical for iOS
+    const handleTouchStart = (e: TouchEvent) => {
+      // Short taps are still allowed for interface interaction
+      const touchTimeoutId = setTimeout(() => {
+        // Only prevent long press (context menu trigger)
+        preventDefault(e);
+      }, 200);
+
+      // Clear the timeout on touch end
+      const clearTouchTimeout = () => clearTimeout(touchTimeoutId);
+      document.addEventListener('touchend', clearTouchTimeout, { once: true });
+    };
+
+    // Disable selection
+    const handleSelectStart = (e: Event) => preventDefault(e);
+
+    // For high protection, disable all touch events
+    // const handleTouchEnd = (e: TouchEvent) => preventDefault(e);
+    // const handleTouchMove = (e: TouchEvent) => preventDefault(e);
+    // const handleTouchCancel = (e: TouchEvent) => preventDefault(e);
+
+    // Apply event listeners to both the image and its container
+    [imageElement, containerElement].forEach(element => {
+      // Basic protection (all protection levels)
+      element.addEventListener('contextmenu', handleContextMenu);
+      element.addEventListener('selectstart', handleSelectStart);
+      element.addEventListener('touchstart', handleTouchStart, { passive: false });
+
+      // Medium and high protection
+      // if (protectionLevel !== 'low') {
+      element.draggable = false;
+      element.addEventListener('dragstart', preventDefault);
+      // }
+
+      // High protection only - completely disables touch interaction
+      // if (protectionLevel === 'high') {
+      // element.addEventListener('touchend', handleTouchEnd, { passive: false });
+      // element.addEventListener('touchmove', handleTouchMove, { passive: false });
+      // element.addEventListener('touchcancel', handleTouchCancel);
+      // }
+    });
+
+    // Clean up event listeners
+    return () => {
+      [imageElement, containerElement].forEach(element => {
+        element.removeEventListener('contextmenu', handleContextMenu);
+        element.removeEventListener('selectstart', handleSelectStart);
+        element.removeEventListener('touchstart', handleTouchStart);
+
+        // if (protectionLevel !== 'low') {
+        element.removeEventListener('dragstart', preventDefault);
+        // }
+
+        // if (protectionLevel === 'high') {
+        // element.removeEventListener('touchend', handleTouchEnd);
+        // element.removeEventListener('touchmove', handleTouchMove);
+        // element.removeEventListener('touchcancel', handleTouchCancel);
+        // }
+      });
+    };
+  }, []);
 
   useEffect(() => {
     setWasCached(
@@ -137,19 +181,48 @@ export default function ImageWithFallback({
   return (
     <div
       className={clsx(
-        'flex relative',
+        'flex relative select-none',
         className,
       )}
+      ref={containerRef}
     >
       <Image {...{
         ...props,
+        width,
+        height,
         src: imageSrc,
         ref: imgRef,
         priority,
         className: classNameImage,
         onLoad,
         onError,
+        draggable: 'false',
+        style: {
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          pointerEvents: 'none',
+        },
       }} />
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'auto',
+          touchAction: 'manipulation',
+        }}
+      >
+        <rect
+          width="100%"
+          height="100%"
+          fill="transparent"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
       <div className={clsx(
         '@container',
         'absolute inset-0 pointer-events-none',
@@ -170,10 +243,10 @@ export default function ImageWithFallback({
               classNameImage,
             ),
           }} />
-          :  <div className={clsx(
+          : <div className={clsx(
             'w-full h-full',
             'bg-gray-100/50 dark:bg-gray-900/50',
-          )} />}
+          )}/>}
       </div>
     </div>
   );
