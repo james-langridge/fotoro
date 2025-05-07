@@ -67,7 +67,7 @@ export default function PhotoLarge({
   showRecipe = true,
   showZoomControls: _showZoomControls = true,
   shouldZoomOnFKeydown = true,
-  shouldShare = true,
+  shouldShare = false,
   shouldShareCamera,
   shouldShareLens,
   shouldShareTag,
@@ -465,10 +465,10 @@ export default function PhotoLarge({
                           : undefined}
                         prefetch={prefetchRelatedLinks}
                       />}
-                    {ALLOW_PUBLIC_DOWNLOADS && 
-                      <DownloadButton 
+                    {ALLOW_PUBLIC_DOWNLOADS &&
+                      <DownloadButton
                         className="translate-y-[0.5px] md:translate-y-0"
-                        photo={photo} 
+                        photo={photo}
                       />}
                   </div>
                 </div>
