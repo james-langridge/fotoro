@@ -32,12 +32,12 @@ export async function updateSession(request: NextRequest) {
 
   // Define public routes that don't require authentication
   const url = new URL(request.url);
-  const publicRoutes = ['/login', '/signup', '/api/auth', '/reset-password', '/auth/callback'];
+  const publicRoutes = ['/auth/login', '/api/auth', '/auth/reset-password', 'a/uth/forgot-password','/auth/callback', '/auth/setup'];
   const isPublicRoute = publicRoutes.some(route => url.pathname.startsWith(route));
 
   // If no user and not on a public route, redirect to login
   if (!user && !isPublicRoute) {
-    const redirectUrl = new URL('/login', request.url);
+    const redirectUrl = new URL('/auth/login', request.url);
     redirectUrl.searchParams.set('redirectedFrom', url.pathname);
     return NextResponse.redirect(redirectUrl);
   }
