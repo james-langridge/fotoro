@@ -20,54 +20,55 @@ export default function ImageWithFallback({
   classNameImage?: string
 }) {
   const { shouldDebugImageFallbacks } = useAppState();
-  const [presignedSrc, setPresignedSrc] = useState<string | null>(null);
   const [wasCached, setWasCached] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [didError, setDidError] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
 
   const onLoad = useCallback(() => setIsLoading(false), []);
+  const onError = useCallback(() => setDidError(true), []);
 
   const [hideFallback, setHideFallback] = useState(false);
 
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const isS3Image = typeof src === 'string' && storageTypeFromUrl(src) === 'aws-s3';
+  // const isS3Image = typeof src === 'string' && storageTypeFromUrl(src) === 'aws-s3';
 
-  const fetchPresignedUrl = useCallback(async () => {
-    if (isS3Image) {
-      try {
-        const fileName = fileNameForStorageUrl(src);
-        const response = await fetch(`/api/presigned-url/${encodeURIComponent(fileName)}`);
-
-        if (response.ok) {
-          const url = await response.text();
-          setPresignedSrc(url);
-        } else {
-          console.error('Failed to get pre-signed URL:', await response.text());
-          setDidError(true);
-        }
-      } catch (error) {
-        console.error('Error fetching pre-signed URL:', error);
-        setDidError(true);
-      }
-    } else {
-      setPresignedSrc(src as string);
-    }
-  }, [isS3Image, src]);
+  // const fetchPresignedUrl = useCallback(async () => {
+  //   if (isS3Image) {
+  //     try {
+  //       const fileName = fileNameForStorageUrl(src);
+  //       const response = await fetch(`/api/presigned-url/${encodeURIComponent(fileName)}`);
+  //
+  //       if (response.ok) {
+  //         const url = await response.text();
+  //         setPresignedSrc(url);
+  //       } else {
+  //         console.error('Failed to get pre-signed URL:', await response.text());
+  //         setDidError(true);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching pre-signed URL:', error);
+  //       setDidError(true);
+  //     }
+  //   } else {
+  //     setPresignedSrc(src as string);
+  //   }
+  // }, [isS3Image, src]);
 
   // Fetch pre-signed URL for S3 images
-  useEffect(() => {
-    fetchPresignedUrl();
-  }, [fetchPresignedUrl, src]);
-
-  const onError = useCallback(async () => {
-    if (isS3Image) {
-      console.log('Image load failed, attempting to refresh pre-signed URL');
-      await fetchPresignedUrl();
-    } else {
-      setDidError(true);
-    }
-  }, [isS3Image, fetchPresignedUrl]);
+  // useEffect(() => {
+  //   fetchPresignedUrl();
+  // }, [fetchPresignedUrl, src]);
+  //
+  // const onError = useCallback(async () => {
+  //   if (isS3Image) {
+  //     console.log('Image load failed, attempting to refresh pre-signed URL');
+  //     await fetchPresignedUrl();
+  //   } else {
+  //     setDidError(true);
+  //   }
+  // }, [isS3Image, fetchPresignedUrl]);
 
   useEffect(() => {
     setWasCached(
@@ -113,8 +114,23 @@ export default function ImageWithFallback({
     };
   }, []);
 
-  // Don't render until we have the pre-signed URL for S3 images
-  if (!presignedSrc && storageTypeFromUrl(src as string) === 'aws-s3') {
+  useEffect(() => {
+    const fetchImageUrl = async () => {
+      if (typeof src === 'string' && storageTypeFromUrl(src) === 'aws-s3') {
+        // Get the file name part of the URL
+        const fileName = fileNameForStorageUrl(src);
+        // Use our protected API route instead of pre-signed URL
+        const protectedUrl = `/api/protected-image/${fileName}`;
+        setImageSrc(protectedUrl);
+      } else {
+        setImageSrc(src as string);
+      }
+    };
+
+    fetchImageUrl();
+  }, [src]);
+
+  if (!imageSrc) {
     return <div className={className}>Loading...</div>;
   }
 
@@ -127,7 +143,7 @@ export default function ImageWithFallback({
     >
       <Image {...{
         ...props,
-        src: presignedSrc || src,
+        src: imageSrc,
         ref: imgRef,
         priority,
         className: classNameImage,
