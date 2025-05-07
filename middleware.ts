@@ -1,19 +1,62 @@
-// import { auth } from './src/auth/server';
-import { NextRequest } from 'next/server';
-// import type { NextApiRequest, NextApiResponse } from 'next';
-// import {
-//   PATH_ADMIN,
-//   PATH_ADMIN_PHOTOS,
-//   PATH_OG,
-//   PATH_OG_SAMPLE,
-//   PREFIX_PHOTO,
-//   PREFIX_TAG,
-// } from './src/app/paths';
-import { updateSession} from '@/auth/supabase/middleware';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // update user's auth session
-  return await updateSession(request);
+  // Check if this is an image request
+  const isImageRequest = request.nextUrl.pathname.startsWith('/_next/image');
+
+  // Create Supabase client
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
+
+  const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+            supabaseResponse = NextResponse.next({
+              request,
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options),
+            );
+          },
+        },
+      },
+  );
+
+  // Get the current user session
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Define public routes that don't require authentication
+  const url = new URL(request.url);
+  const publicRoutes = ['/auth/login', '/api/auth', '/auth/reset-password', '/auth/forgot-password', '/auth/callback', '/auth/setup'];
+  const isPublicRoute = publicRoutes.some(route => url.pathname.startsWith(route));
+
+  // Special handling for image requests - they are never public
+  if (isImageRequest) {
+    // If no user and this is an image request, block access
+    if (!user) {
+      return new NextResponse('Authentication required', { status: 401 });
+    }
+    // If authenticated, allow access to the image
+    return supabaseResponse;
+  }
+
+  // For non-image requests, continue with normal authentication flow
+  if (!user && !isPublicRoute) {
+    const redirectUrl = new URL('/auth/login', request.url);
+    redirectUrl.searchParams.set('redirectedFrom', url.pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  return supabaseResponse;
 }
 
 export const config = {
