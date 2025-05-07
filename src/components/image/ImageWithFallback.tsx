@@ -32,8 +32,6 @@ export default function ImageWithFallback({
   const imgRef = useRef<HTMLImageElement>(null);
 
   const isS3Image = typeof src === 'string' && storageTypeFromUrl(src) === 'aws-s3';
-  const hasPreSignedParams = typeof presignedSrc === 'string' && presignedSrc.includes('X-Amz-Signature');
-  const skipOptimization = isS3Image || hasPreSignedParams;
 
   const fetchPresignedUrl = useCallback(async () => {
     if (isS3Image) {
@@ -135,7 +133,6 @@ export default function ImageWithFallback({
         className: classNameImage,
         onLoad,
         onError,
-        unoptimized: skipOptimization,
       }} />
       <div className={clsx(
         '@container',
