@@ -36,11 +36,11 @@ export async function handleSupabaseAuth(
   }
 
   const url = new URL(request.url);
-  const publicRoutes = ['/auth/login', '/api/auth', '/auth/reset-password', '/auth/forgot-password', '/auth/callback', '/auth/setup'];
+  const publicRoutes = ['/login', '/reset-password', '/forgot-password', '/auth/callback', '/setup'];
   const isPublicRoute = publicRoutes.some(route => url.pathname.startsWith(route));
 
   if (!user && !isPublicRoute) {
-    const redirectUrl = new URL('/auth/login', request.url);
+    const redirectUrl = new URL('/login', request.url);
     redirectUrl.searchParams.set('redirectedFrom', url.pathname);
     return NextResponse.redirect(redirectUrl);
   }

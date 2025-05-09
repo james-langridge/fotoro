@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
 
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push('/auth/login');
+        router.push('/login');
       }, 3000);
 
     } catch (error: any) {
@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
           {error}
         </div>
         <button
-          onClick={() => router.push('/auth/forgot-password')}
+          onClick={() => router.push('/forgot-password')}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
                     Request New Reset Link

@@ -137,7 +137,7 @@ export default function ImageWithFallback({
         // Get the file name part of the URL
         const fileName = fileNameForStorageUrl(src);
         // Use our protected API route instead of pre-signed URL
-        const protectedUrl = `/api/protected-image/${fileName}`;
+        const protectedUrl = `/api/auth/supabase/protected-image/${fileName}`;
         setImageSrc(protectedUrl);
       } else {
         setImageSrc(src as string);

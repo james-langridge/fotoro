@@ -63,7 +63,7 @@ export default function Footer() {
                     <div className="truncate max-w-full">
                       {user.email}
                     </div>
-                    <form action="/api/auth/signout" method="post">
+                    <form action="/api/auth/supabase/signout" method="post">
                       <SubmitButtonWithStatus styleAs="link">
                         Sign out
                       </SubmitButtonWithStatus>
