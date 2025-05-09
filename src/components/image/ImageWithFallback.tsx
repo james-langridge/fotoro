@@ -68,30 +68,12 @@ export default function ImageWithFallback({
     // Disable selection
     const handleSelectStart = (e: Event) => preventDefault(e);
 
-    // For high protection, disable all touch events
-    // const handleTouchEnd = (e: TouchEvent) => preventDefault(e);
-    // const handleTouchMove = (e: TouchEvent) => preventDefault(e);
-    // const handleTouchCancel = (e: TouchEvent) => preventDefault(e);
-
-    // Apply event listeners to both the image and its container
     [imageElement, containerElement].forEach(element => {
-      // Basic protection (all protection levels)
       element.addEventListener('contextmenu', handleContextMenu);
       element.addEventListener('selectstart', handleSelectStart);
       element.addEventListener('touchstart', handleTouchStart, { passive: false });
-
-      // Medium and high protection
-      // if (protectionLevel !== 'low') {
-      element.draggable = false;
       element.addEventListener('dragstart', preventDefault);
-      // }
-
-      // High protection only - completely disables touch interaction
-      // if (protectionLevel === 'high') {
-      // element.addEventListener('touchend', handleTouchEnd, { passive: false });
-      // element.addEventListener('touchmove', handleTouchMove, { passive: false });
-      // element.addEventListener('touchcancel', handleTouchCancel);
-      // }
+      element.draggable = false;
     });
 
     // Clean up event listeners
@@ -100,16 +82,7 @@ export default function ImageWithFallback({
         element.removeEventListener('contextmenu', handleContextMenu);
         element.removeEventListener('selectstart', handleSelectStart);
         element.removeEventListener('touchstart', handleTouchStart);
-
-        // if (protectionLevel !== 'low') {
         element.removeEventListener('dragstart', preventDefault);
-        // }
-
-        // if (protectionLevel === 'high') {
-        // element.removeEventListener('touchend', handleTouchEnd);
-        // element.removeEventListener('touchmove', handleTouchMove);
-        // element.removeEventListener('touchcancel', handleTouchCancel);
-        // }
       });
     };
   }, []);
