@@ -8,8 +8,7 @@ import {
   PREFIX_PHOTO,
   PREFIX_TAG,
 } from './src/app/paths';
-
-const USE_SUPABASE_AUTH = process.env.NEXT_PUBLIC_USE_SUPABASE_AUTH === '1';
+import {ENHANCED_PRIVACY_ENABLED} from '@/app/config';
 
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
@@ -36,7 +35,7 @@ export async function middleware(req: NextRequest) {
     ));
   }
 
-  if (USE_SUPABASE_AUTH) {
+  if (ENHANCED_PRIVACY_ENABLED) {
     return handleSupabaseAuth(req, response);
   }
 
