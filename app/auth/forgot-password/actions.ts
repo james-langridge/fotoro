@@ -10,7 +10,7 @@ export async function requestPasswordReset(formData: FormData) {
 
   // Set custom redirect path for the reset link
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
   });
 
   if (error) {
@@ -19,5 +19,5 @@ export async function requestPasswordReset(formData: FormData) {
   }
 
   // Redirect to success page
-  redirect('/forgot-password/confirmation');
+  redirect('/auth/forgot-password/confirmation');
 }
