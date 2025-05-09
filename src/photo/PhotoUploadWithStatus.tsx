@@ -101,7 +101,7 @@ export default function PhotoUploadWithStatus({
           }}
           onBlobReady={async ({
             blob,
-            extension, 
+            extension,
             hasMultipleUploads,
             isLastBlob,
           }) => {
