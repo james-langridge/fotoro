@@ -1,6 +1,8 @@
 import {
   getExtensionFromStorageUrl,
   getIdFromStorageUrl,
+  storageTypeFromUrl,
+  fileNameForStorageUrl,
 } from '@/platforms/storage';
 import { convertFormDataToPhotoDbInsert } from '@/photo/form';
 import {
@@ -11,6 +13,7 @@ import { ExifData, ExifParserFactory } from 'ts-exif-parser';
 import { PhotoFormData } from './form';
 import sharp, { Sharp } from 'sharp';
 import {
+  ENHANCED_PRIVACY_ENABLED,
   GEO_PRIVACY_ENABLED,
   PRESERVE_ORIGINAL_UPLOADS,
 } from '@/app/config';
@@ -25,6 +28,8 @@ import {
 } from './db/query';
 import { PhotoDbInsert } from '.';
 import { convertExifToFormData } from './form/server';
+import {GetObjectCommand} from '@aws-sdk/client-s3';
+import {awsS3Client} from '@/platforms/storage/aws-s3';
 
 const IMAGE_WIDTH_RESIZE = 200;
 const IMAGE_WIDTH_BLUR = 200;
@@ -32,10 +37,10 @@ const IMAGE_WIDTH_BLUR = 200;
 export const extractImageDataFromBlobPath = async (
   blobPath: string,
   options?: {
-    includeInitialPhotoFields?: boolean
-    generateBlurData?: boolean
-    generateResizedImage?: boolean
-  },
+      includeInitialPhotoFields?: boolean
+      generateBlurData?: boolean
+      generateResizedImage?: boolean
+    },
 ): Promise<{
   blobId?: string
   formDataFromExif?: Partial<PhotoFormData>
@@ -64,13 +69,35 @@ export const extractImageDataFromBlobPath = async (
   let shouldStripGpsData = false;
   let error: string | undefined;
 
-  const fileBytes = blobPath
-    ? await fetch(url, { cache: 'no-store' }).then(res => res.arrayBuffer())
-      .catch(e => {
-        error = `Error fetching image from ${url}: "${e.message}"`;
-        return undefined;
-      })
-    : undefined;
+  let fileBytes: ArrayBuffer | undefined;
+
+  try {
+    if (storageTypeFromUrl(url) === 'aws-s3' && ENHANCED_PRIVACY_ENABLED) {
+      const fileName = fileNameForStorageUrl(url);
+
+      const command = new GetObjectCommand({
+        Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET!,
+        Key: fileName,
+      });
+
+      const response = await awsS3Client().send(command);
+
+      if (response.Body) {
+        const bytes = await response.Body.transformToByteArray();
+        fileBytes = bytes.buffer as ArrayBuffer;
+      }
+    } else {
+      fileBytes = await fetch(url, { cache: 'no-store' })
+        .then(res => res.arrayBuffer())
+        .catch(e => {
+          error = `Error fetching image from ${url}: "${e.message}"`;
+          return undefined;
+        });
+    }
+  } catch (e) {
+    error = `Error fetching image from S3: "${e}"`;
+  }
+  if (error) { console.log(error); }
 
   try {
     if (fileBytes) {
@@ -103,7 +130,7 @@ export const extractImageDataFromBlobPath = async (
 
       shouldStripGpsData = GEO_PRIVACY_ENABLED && (
         Boolean(exifData.tags?.GPSLatitude) ||
-        Boolean(exifData.tags?.GPSLongitude)
+          Boolean(exifData.tags?.GPSLongitude)
       );
     }
   } catch (e) {
@@ -136,26 +163,26 @@ export const extractImageDataFromBlobPath = async (
 const generateBase64 = async (
   image: ArrayBuffer,
   middleware: (sharp: Sharp) => Sharp,
-) => 
+) =>
   middleware(sharp(image))
     .withMetadata()
     .toFormat('jpeg', { quality: 90 })
     .toBuffer()
     .then(data => `data:image/jpeg;base64,${data.toString('base64')}`);
 
-const resizeImage = async (image: ArrayBuffer) => 
+const resizeImage = async (image: ArrayBuffer) =>
   generateBase64(image, sharp => sharp
     .resize(IMAGE_WIDTH_RESIZE),
   );
 
-const blurImage = async (image: ArrayBuffer) => 
+const blurImage = async (image: ArrayBuffer) =>
   generateBase64(image, sharp => sharp
     .resize(IMAGE_WIDTH_BLUR)
     .modulate({ saturation: 1.15 })
     .blur(4),
   );
 
-export const resizeImageFromUrl = async (url: string) => 
+export const resizeImageFromUrl = async (url: string) =>
   fetch(decodeURIComponent(url))
     .then(res => res.arrayBuffer())
     .then(buffer => resizeImage(buffer))
@@ -164,7 +191,7 @@ export const resizeImageFromUrl = async (url: string) =>
       return '';
     });
 
-export const blurImageFromUrl = async (url: string) => 
+export const blurImageFromUrl = async (url: string) =>
   fetch(decodeURIComponent(url))
     .then(res => res.arrayBuffer())
     .then(buffer => blurImage(buffer))
