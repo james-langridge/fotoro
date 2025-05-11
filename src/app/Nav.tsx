@@ -108,7 +108,7 @@ export default function Nav({
                     </form>
                   </>}
               </div>
-              <div className="flex items-center h-10">
+              <div className="hidden sm:flex items-center h-10">
                 <ThemeSwitcher/>
               </div>
             </nav>]
