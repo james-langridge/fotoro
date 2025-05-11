@@ -114,7 +114,7 @@ export default function ImageInput({
                   };
 
                   const isPng = callbackArgs.extension === 'png';
-                  
+
                   const canvas = canvasRef.current;
 
                   // Specify wide gamut to avoid data loss while resizing
@@ -129,94 +129,130 @@ export default function ImageInput({
                     setUploadState?.({ image });
 
                     ctx.save();
-                    
-                    let orientation = await getOrientation(file)
-                      .catch(() => 1) ?? 1;
 
-                    // Preserve EXIF data for PNGs
-                    if (!isPng) {
-                      // Reverse engineer orientation
-                      // so preserved EXIF data can be copied
-                      switch (orientation) {
-                      case 1: orientation = 1; break;
-                      case 2: orientation = 1; break;
-                      case 3: orientation = 3; break;
-                      case 4: orientation = 1; break;
-                      case 5: orientation = 1; break;
-                      case 6: orientation = 8; break;
-                      case 7: orientation = 1; break;
-                      case 8: orientation = 6; break;
-                      }
-                    }
+                    // Replace the problematic orientation handling in your ImageInput component
+                    // with this corrected version:
 
+                    // Get EXIF orientation
+                    const orientation = await getOrientation(file)
+                      .catch(err => {
+                        console.warn('⚠️ Failed to get orientation', err);
+                        return 1;
+                      }) ?? 1;
+
+                    console.log('📐 Original EXIF orientation', { orientation });
+
+                    // Don't modify the orientation value - use it directly!
+                    // The canvas transformations below will handle the actual rotation
+
+                    // Calculate dimensions
                     const ratio = image.width / image.height;
-  
-                    const width =
-                      Math.round(ratio >= 1 ? maxSize : maxSize * ratio);
-                    const height =
-                      Math.round(ratio >= 1 ? maxSize / ratio : maxSize);
 
-                    canvas.width = width;
-                    canvas.height = height;
+                    // For orientations 5-8, we need to swap width and height
+                    const needsRotation = orientation >= 5 && orientation <= 8;
+                    let canvasWidth, canvasHeight;
 
-                    // Orientation transforms from:
-                    // eslint-disable-next-line max-len
-                    // https://gist.github.com/SagiMedina/f00a57de4e211456225d3114fd10b0d0
-                    
+                    if (needsRotation) {
+                      // Swap dimensions for 90/270 degree rotations
+                      canvasWidth = Math.round(ratio >= 1 ? maxSize / ratio : maxSize);
+                      canvasHeight = Math.round(ratio >= 1 ? maxSize : maxSize * ratio);
+                    } else {
+                      // Normal dimensions
+                      canvasWidth = Math.round(ratio >= 1 ? maxSize : maxSize * ratio);
+                      canvasHeight = Math.round(ratio >= 1 ? maxSize / ratio : maxSize);
+                    }
+
+                    // Set initial canvas size
+                    canvas.width = canvasWidth;
+                    canvas.height = canvasHeight;
+
+                    console.log('📏 Canvas dimensions', {
+                      canvasWidth,
+                      canvasHeight,
+                      needsRotation,
+                    });
+
+                    // Save the context state
+                    ctx.save();
+
+                    // Apply the correct transformation based on EXIF orientation
                     switch(orientation) {
+                    case 1:
+                      // Normal - no transformation needed
+                      break;
+
                     case 2:
-                      ctx.translate(width, 0);
+                      // Horizontal flip
                       ctx.scale(-1, 1);
+                      ctx.translate(-canvasWidth, 0);
                       break;
+
                     case 3:
-                      ctx.translate(width, height);
-                      ctx.rotate((180 / 180) * Math.PI);
+                      // 180 degree rotation
+                      ctx.rotate(Math.PI);
+                      ctx.translate(-canvasWidth, -canvasHeight);
                       break;
+
                     case 4:
-                      ctx.translate(0, height);
+                      // Vertical flip
                       ctx.scale(1, -1);
+                      ctx.translate(0, -canvasHeight);
                       break;
+
                     case 5:
-                      canvas.width = height;
-                      canvas.height = width;
-                      ctx.rotate((90 / 180) * Math.PI);
-                      ctx.scale(1, -1);
+                      // Horizontal flip + 90 degree CCW rotation
+                      canvas.width = canvasHeight;
+                      canvas.height = canvasWidth;
+                      ctx.rotate(-Math.PI / 2);
+                      ctx.scale(-1, 1);
+                      ctx.translate(-canvasWidth, 0);
                       break;
+
                     case 6:
-                      canvas.width = height;
-                      canvas.height = width;
-                      ctx.rotate((90 / 180) * Math.PI);
-                      ctx.translate(0, -height);
+                      // 90 degree clockwise rotation
+                      canvas.width = canvasHeight;
+                      canvas.height = canvasWidth;
+                      ctx.rotate(Math.PI / 2);
+                      ctx.translate(0, -canvasWidth);
                       break;
+
                     case 7:
-                      canvas.width = height;
-                      canvas.height = width;
-                      ctx.rotate((270 / 180) * Math.PI);
-                      ctx.translate(-width, height);
-                      ctx.scale(1, -1);
+                      // Horizontal flip + 90 degree CW rotation
+                      canvas.width = canvasHeight;
+                      canvas.height = canvasWidth;
+                      ctx.rotate(Math.PI / 2);
+                      ctx.scale(-1, 1);
+                      ctx.translate(-canvasHeight, -canvasWidth);
                       break;
+
                     case 8:
-                      canvas.width = height;
-                      canvas.height = width;
-                      ctx.translate(0, width);
-                      ctx.rotate((270 / 180) * Math.PI);
+                      // 90 degree counter-clockwise rotation
+                      canvas.width = canvasHeight;
+                      canvas.height = canvasWidth;
+                      ctx.rotate(-Math.PI / 2);
+                      ctx.translate(-canvasHeight, 0);
                       break;
                     }
 
-                    ctx.drawImage(image, 0, 0, width, height);
+                    // Draw the image with the transformation applied
+                    ctx.drawImage(image, 0, 0, canvasWidth, canvasHeight);
 
+                    // Restore the context state
                     ctx.restore();
 
+                    // Continue with the blob creation...
                     canvas.toBlob(
                       async blob => {
                         if (blob) {
-                          const blobWithExif = await CopyExif(file, blob)
-                            // Fallback to original blob if EXIF data is missing
-                            // or image is in PNG format which cannot be parsed
-                            .catch(() => blob);
+                          console.log('✅ Canvas blob created with correct orientation');
+
+                          // IMPORTANT: For JPEG output, we don't need to preserve EXIF orientation
+                          // because we've already applied the rotation to the image data itself.
+                          // The output image should have orientation=1 (normal)
+
                           await onBlobReady?.({
                             ...callbackArgs,
-                            blob: blobWithExif,
+                            blob: blob,  // This blob now has the correct orientation baked in
                           });
                         }
                       },
