@@ -35,6 +35,9 @@ export const isUrlFromAwsS3 = (url?: string) =>
 export const awsS3PutObjectCommandForKey = (Key: string) =>
   new PutObjectCommand({ Bucket: AWS_S3_BUCKET, Key });
 
+const awsS3GetObjectCommandForKey = (Key: string) =>
+  new GetObjectCommand({ Bucket: AWS_S3_BUCKET, Key });
+
 export const awsS3Put = async (
   file: Buffer,
   fileName: string,
@@ -85,15 +88,18 @@ export const awsS3Delete = async (Key: string) => {
   }));
 };
 
+export const awsS3Get = async (Key: string) => {
+  return awsS3Client().send(new GetObjectCommand({
+    Bucket: AWS_S3_BUCKET,
+    Key,
+  }));
+};
+
+// TODO implement public sharing page with presigned url
 export const getPresignedUrl = async (key: string, expiresIn = 3600) => {
   if (key.startsWith('http')) {
     key = key.split('/').pop() || '';
   }
 
-  const command = new GetObjectCommand({
-    Bucket: AWS_S3_BUCKET,
-    Key: key,
-  });
-
-  return getSignedUrl(awsS3Client(), command, { expiresIn });
+  return getSignedUrl(awsS3Client(), awsS3GetObjectCommandForKey(key), { expiresIn });
 };

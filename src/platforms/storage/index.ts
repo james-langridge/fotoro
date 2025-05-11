@@ -118,17 +118,12 @@ export const uploadFromClientViaPresignedUrl = async (
   extension: string,
   addRandomSuffix?: boolean,
 ) => {
-  console.log(`[uploadFromClientViaPresignedUrl] file: ${fileName}.${extension}`);
   const key = addRandomSuffix
     ? `${fileName}-${generateStorageId()}.${extension}`
     : `${fileName}.${extension}`;
 
-  console.log(`[uploadFromClientViaPresignedUrl] key: ${key}`);
-
   const url = await fetch(`${PATH_API_PRESIGNED_URL}/${key}`)
     .then((response) => response.text());
-
-  console.log(`[uploadFromClientViaPresignedUrl] url: ${url}`);
 
   return fetch(url, { method: 'PUT', body: file })
     .then(() => `${baseUrlForStorage(CURRENT_STORAGE)}/${key}`);

@@ -32,7 +32,7 @@ export async function handleSupabaseAuth(
   const isImageRequest = request.nextUrl.pathname.startsWith('/_next/image');
 
   if (isImageRequest && !user) {
-    return new NextResponse('Authentication required', { status: 401 });
+    return new NextResponse('Unauthorized request', { status: 401 });
   }
 
   const url = new URL(request.url);

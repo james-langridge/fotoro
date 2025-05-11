@@ -28,8 +28,7 @@ import {
 } from './db/query';
 import { PhotoDbInsert } from '.';
 import { convertExifToFormData } from './form/server';
-import {GetObjectCommand} from '@aws-sdk/client-s3';
-import {awsS3Client} from '@/platforms/storage/aws-s3';
+import { awsS3Get} from '@/platforms/storage/aws-s3';
 
 const IMAGE_WIDTH_RESIZE = 200;
 const IMAGE_WIDTH_BLUR = 200;
@@ -73,14 +72,7 @@ export const extractImageDataFromBlobPath = async (
 
   try {
     if (storageTypeFromUrl(url) === 'aws-s3' && ENHANCED_PRIVACY_ENABLED) {
-      const fileName = fileNameForStorageUrl(url);
-
-      const command = new GetObjectCommand({
-        Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET!,
-        Key: fileName,
-      });
-
-      const response = await awsS3Client().send(command);
+      const response = await awsS3Get(fileNameForStorageUrl(url));
 
       if (response.Body) {
         const bytes = await response.Body.transformToByteArray();
