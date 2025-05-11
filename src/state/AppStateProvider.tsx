@@ -79,8 +79,6 @@ export default function AppStateProvider({
     useState<string>();
   const [supabaseEmail, setSupabaseEmail] =
         useState<string>();
-  const [supabaseEmailEager, setSupabaseEmailEager] =
-        useState<string>();
   const [userEmailEager, setUserEmailEager] =
     useState<string>();
   // ADMIN

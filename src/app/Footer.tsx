@@ -4,7 +4,7 @@ import { clsx } from 'clsx/lite';
 import AppGrid from '../components/AppGrid';
 import ThemeSwitcher from '@/app/ThemeSwitcher';
 import Link from 'next/link';
-import { SHOW_REPO_LINK } from '@/app/config';
+import {ENHANCED_PRIVACY_ENABLED, SHOW_REPO_LINK} from '@/app/config';
 import RepoLink from '../components/RepoLink';
 import { usePathname } from 'next/navigation';
 import {PATH_ADMIN_PHOTOS, isPathAdmin, isPathSignIn, isPathLogin} from './paths';
@@ -12,6 +12,7 @@ import SubmitButtonWithStatus from '@/components/SubmitButtonWithStatus';
 import AnimateItems from '@/components/AnimateItems';
 import { useAppState } from '@/state/AppState';
 import Spinner from '@/components/Spinner';
+import {signOutAction} from '@/auth/actions';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -20,11 +21,15 @@ export default function Footer() {
     userEmail,
     userEmailEager,
     isCheckingAuth,
+    clearAuthStateAndRedirectIfNecessary,
   } = useAppState();
 
   const showFooter = !isPathSignIn(pathname) && !isPathLogin(pathname);
 
   const shouldAnimate = !isPathAdmin(pathname);
+
+  const action = ENHANCED_PRIVACY_ENABLED ? '/api/auth/supabase/signout' : () => signOutAction()
+    .then(clearAuthStateAndRedirectIfNecessary);
 
   return (
     <AppGrid
@@ -46,7 +51,7 @@ export default function Footer() {
                     <div className="truncate max-w-full">
                       {userEmail || userEmailEager}
                     </div>
-                    <form action="/api/auth/supabase/signout" method="post">
+                    <form action={action} method="post">
                       <SubmitButtonWithStatus styleAs="link">
                                                 Sign out
                       </SubmitButtonWithStatus>

@@ -40,7 +40,6 @@ export type AppStateContextType = {
   // AUTH
   userEmail?: string
   supabaseEmail?: string
-  supabaseEmailEager?: string
   setSupabaseEmail?: Dispatch<SetStateAction<string | undefined>>
   userEmailEager?: string
   setUserEmail?: Dispatch<SetStateAction<string | undefined>>

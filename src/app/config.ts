@@ -276,6 +276,7 @@ export const SHOW_SOCIAL =
   process.env.NEXT_PUBLIC_HIDE_SOCIAL !== '1';
 export const SHOW_REPO_LINK =
   process.env.NEXT_PUBLIC_HIDE_REPO_LINK !== '1';
+export const SHOW_SIGN_OUT_BOTTOM = process.env.NEXT_PUBLIC_SHOW_SIGN_OUT_TOP !== '1';
 
 // GRID
 
@@ -304,7 +305,6 @@ export const PRIORITY_ORDER_ENABLED =
 export const OG_TEXT_BOTTOM_ALIGNMENT =
   (process.env.NEXT_PUBLIC_OG_TEXT_ALIGNMENT ?? '').toUpperCase() === 'BOTTOM';
 export const ENHANCED_PRIVACY_ENABLED = process.env.NEXT_PUBLIC_ENHANCED_PRIVACY === '1';
-export const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 // INTERNAL
 

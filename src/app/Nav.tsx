@@ -11,12 +11,13 @@ import {
   isPathFeed,
   isPathGrid,
   isPathProtected,
-  isPathSignIn, isPathLogin,
+  isPathSignIn, isPathLogin, PATH_ADMIN_PHOTOS,
 } from '@/app/paths';
 import AnimateItems from '../components/AnimateItems';
 import {
+  ENHANCED_PRIVACY_ENABLED,
   GRID_HOMEPAGE_ENABLED,
-  NAV_CAPTION,
+  NAV_CAPTION, SHOW_REPO_LINK, SHOW_SIGN_OUT_BOTTOM,
 } from './config';
 import { useRef } from 'react';
 import useStickyNav from './useStickyNav';
@@ -24,6 +25,9 @@ import SubmitButtonWithStatus from '@/components/SubmitButtonWithStatus';
 import ThemeSwitcher from '@/app/ThemeSwitcher';
 import {useAppState} from '@/state/AppState';
 import {signOut} from '@/auth/supabase/actions';
+import Spinner from '@/components/Spinner';
+import RepoLink from '@/components/RepoLink';
+import {signOutAction} from '@/auth/actions';
 
 const NAV_HEIGHT_CLASS = NAV_CAPTION
   ? 'min-h-[4rem] sm:min-h-[5rem]'
@@ -34,13 +38,7 @@ export default function Nav({
 }: {
   navTitleOrDomain: string;
 }) {
-  const {
-    userEmail,
-    supabaseEmail,
-    supabaseEmailEager,
-    userEmailEager,
-    clearAuthStateAndRedirectIfNecessary,
-  } = useAppState();
+  const { userEmail, userEmailEager, isCheckingAuth, clearAuthStateAndRedirectIfNecessary, supabaseEmail } = useAppState();
 
   const ref = useRef<HTMLElement>(null);
 
@@ -95,19 +93,54 @@ export default function Nav({
               <AppViewSwitcher
                 currentSelection={switcherSelectionForPath()}
               />
-              <div className="flex gap-x-3 xs:gap-x-4 grow flex-wrap">
+              {SHOW_SIGN_OUT_BOTTOM ? <div className={clsx(
+                'grow text-right min-w-0',
+                'hidden xs:block',
+                'translate-y-[-1px]',
+              )}>
+                <div className="truncate overflow-hidden select-none">
+                  {renderLink(navTitleOrDomain, PATH_ROOT)}
+                </div>
+                {NAV_CAPTION &&
+                          <div className={clsx(
+                            'hidden sm:block truncate overflow-hidden',
+                            'leading-tight text-dim',
+                          )}>
+                            {NAV_CAPTION}
+                          </div>}
+              </div> : ENHANCED_PRIVACY_ENABLED ? <div className="flex gap-x-3 xs:gap-x-4 grow flex-wrap">
                 {supabaseEmail
-                  && <>
+                          && <>
+                            <div className="truncate max-w-full">
+                              {supabaseEmail}
+                            </div>
+                            <form action={() => signOut()}>
+                              <SubmitButtonWithStatus styleAs="link">
+                                      Sign out
+                              </SubmitButtonWithStatus>
+                            </form>
+                          </>}
+              </div> : <div className="flex gap-x-3 xs:gap-x-4 grow flex-wrap">
+                {userEmail || userEmailEager
+                  ? <>
                     <div className="truncate max-w-full">
-                      {supabaseEmail}
+                      {userEmail || userEmailEager}
                     </div>
-                    <form action={()=> signOut()}>
+                    <form action={() => signOutAction()
+                      .then(clearAuthStateAndRedirectIfNecessary)} method="post">
                       <SubmitButtonWithStatus styleAs="link">
-                                Sign out
+                                      Sign out
                       </SubmitButtonWithStatus>
                     </form>
-                  </>}
-              </div>
+                  </>
+                  : isCheckingAuth
+                    ? <Spinner size={16} className="translate-y-[2px]"/>
+                    : SHOW_REPO_LINK
+                      ? <RepoLink/>
+                      : <Link href={PATH_ADMIN_PHOTOS}>
+                                      Admin
+                      </Link>}
+              </div>}
               <div className="hidden sm:flex items-center h-10">
                 <ThemeSwitcher/>
               </div>

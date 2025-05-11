@@ -9,13 +9,9 @@ export const KEY_CREDENTIALS_SUCCESS = 'success';
 export const KEY_CALLBACK_URL = 'callbackUrl';
 
 const KEY_AUTH_EMAIL = 'authjs.email';
-const KEY_SUPABASE_EMAIL = 'supabase.email';
 
 export const storeAuthEmailCookie = (email: string) =>
   storeCookie(KEY_AUTH_EMAIL, email);
-
-export const storeAuthSupabaseEmailCookie = (email: string) =>
-  storeCookie(KEY_SUPABASE_EMAIL, email);
 
 export const getAuthEmailCookie = () =>
   getCookie(KEY_AUTH_EMAIL);
