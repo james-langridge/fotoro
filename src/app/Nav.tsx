@@ -11,7 +11,7 @@ import {
   isPathFeed,
   isPathGrid,
   isPathProtected,
-  isPathSignIn,
+  isPathSignIn, isPathLogin,
 } from '@/app/paths';
 import AnimateItems from '../components/AnimateItems';
 import {
@@ -20,6 +20,10 @@ import {
 } from './config';
 import { useRef } from 'react';
 import useStickyNav from './useStickyNav';
+import SubmitButtonWithStatus from '@/components/SubmitButtonWithStatus';
+import ThemeSwitcher from '@/app/ThemeSwitcher';
+import {useAppState} from '@/state/AppState';
+import {signOut} from '@/auth/supabase/actions';
 
 const NAV_HEIGHT_CLASS = NAV_CAPTION
   ? 'min-h-[4rem] sm:min-h-[5rem]'
@@ -30,10 +34,18 @@ export default function Nav({
 }: {
   navTitleOrDomain: string;
 }) {
+  const {
+    userEmail,
+    supabaseEmail,
+    supabaseEmailEager,
+    userEmailEager,
+    clearAuthStateAndRedirectIfNecessary,
+  } = useAppState();
+
   const ref = useRef<HTMLElement>(null);
 
   const pathname = usePathname();
-  const showNav = !isPathSignIn(pathname);
+  const showNav = !isPathSignIn(pathname) && !isPathLogin(pathname);;
 
   const {
     classNameStickyContainer,
@@ -83,21 +95,21 @@ export default function Nav({
               <AppViewSwitcher
                 currentSelection={switcherSelectionForPath()}
               />
-              <div className={clsx(
-                'grow text-right min-w-0',
-                'hidden xs:block',
-                'translate-y-[-1px]',
-              )}>
-                <div className="truncate overflow-hidden select-none">
-                  {renderLink(navTitleOrDomain, PATH_ROOT)}
-                </div>
-                {NAV_CAPTION &&
-                  <div className={clsx(
-                    'hidden sm:block truncate overflow-hidden',
-                    'leading-tight text-dim',
-                  )}>
-                    {NAV_CAPTION}
-                  </div>}
+              <div className="flex gap-x-3 xs:gap-x-4 grow flex-wrap">
+                {supabaseEmail
+                  && <>
+                    <div className="truncate max-w-full">
+                      {supabaseEmail}
+                    </div>
+                    <form action={()=> signOut()}>
+                      <SubmitButtonWithStatus styleAs="link">
+                                Sign out
+                      </SubmitButtonWithStatus>
+                    </form>
+                  </>}
+              </div>
+              <div className="flex items-center h-10">
+                <ThemeSwitcher/>
               </div>
             </nav>]
             : []}

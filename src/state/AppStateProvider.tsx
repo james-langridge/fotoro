@@ -28,6 +28,7 @@ import { RecipeProps } from '@/recipe';
 import { getCountsForCategoriesCachedAction } from '@/category/actions';
 import { nanoid } from 'nanoid';
 import { toastSuccess } from '@/toast';
+import {createClient} from '@/auth/supabase/client';
 
 export default function AppStateProvider({
   children,
@@ -76,6 +77,10 @@ export default function AppStateProvider({
   // AUTH
   const [userEmail, setUserEmail] =
     useState<string>();
+  const [supabaseEmail, setSupabaseEmail] =
+        useState<string>();
+  const [supabaseEmailEager, setSupabaseEmailEager] =
+        useState<string>();
   const [userEmailEager, setUserEmailEager] =
     useState<string>();
   // ADMIN
@@ -123,6 +128,15 @@ export default function AppStateProvider({
   } = useSWR('getAuth', getAuthAction);
   useEffect(() => {
     setUserEmailEager(getAuthEmailCookie());
+  }, []);
+  useEffect(() => {
+    async function getSupabaseUser() {
+      const supabase = await createClient();
+      const {data: {user}} = await supabase.auth.getUser();
+      const email = user?.email ?? undefined;
+      setSupabaseEmail(email);
+    }
+    getSupabaseUser();
   }, []);
   useEffect(() => {
     if (authError) {
@@ -222,6 +236,8 @@ export default function AppStateProvider({
         // AUTH
         isCheckingAuth,
         userEmail,
+        supabaseEmail,
+        setSupabaseEmail,
         userEmailEager,
         setUserEmail,
         isUserSignedIn,

@@ -9,6 +9,7 @@ import {
 import IconSearch from '../components/icons/IconSearch';
 import { useAppState } from '@/state/AppState';
 import {
+  ADMIN_EMAIL,
   GRID_HOMEPAGE_ENABLED,
   SHOW_KEYBOARD_SHORTCUT_TOOLTIPS,
 } from './config';
@@ -35,7 +36,12 @@ export default function AppViewSwitcher({
     isUserSignedIn,
     isUserSignedInEager,
     setIsCommandKOpen,
+    userEmail,
   } = useAppState();
+  // console.log({isUserSignedIn});
+  // console.log({userEmail});
+  // console.log({ADMIN_EMAIL});
+  // console.log('Boolean(userEmail) && userEmail === ADMIN_EMAIL;', Boolean(userEmail) && userEmail === ADMIN_EMAIL);
 
   const refHrefFeed = useRef<HTMLAnchorElement>(null);
   const refHrefGrid = useRef<HTMLAnchorElement>(null);
@@ -96,18 +102,18 @@ export default function AppViewSwitcher({
         {GRID_HOMEPAGE_ENABLED ? renderItemGrid : renderItemFeed}
         {GRID_HOMEPAGE_ENABLED ? renderItemFeed : renderItemGrid}
         {/* Show spinner if admin is suspected to be logged in */}
-        {(isUserSignedInEager && !isUserSignedIn) &&
-          <SwitcherItem
-            icon={<Spinner />}
-            isInteractive={false}
-            noPadding
-            tooltip={{
-              ...!isAdminMenuOpen && SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-                content: 'Admin Menu',
-                keyCommand: KEY_COMMANDS.admin,
-              },
-            }}
-          />}
+        {/*{(isUserSignedInEager && !isUserSignedIn) &&*/}
+        {/*  <SwitcherItem*/}
+        {/*    icon={<Spinner />}*/}
+        {/*    isInteractive={false}*/}
+        {/*    noPadding*/}
+        {/*    tooltip={{*/}
+        {/*      ...!isAdminMenuOpen && SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {*/}
+        {/*        content: 'Admin Menu',*/}
+        {/*        keyCommand: KEY_COMMANDS.admin,*/}
+        {/*      },*/}
+        {/*    }}*/}
+        {/*  />}*/}
         {isUserSignedIn &&
           <SwitcherItem
             icon={<AdminAppMenu

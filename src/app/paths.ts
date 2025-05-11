@@ -13,6 +13,7 @@ export const PATH_FEED                  = '/feed';
 export const PATH_ADMIN                 = '/admin';
 export const PATH_API                   = '/api';
 export const PATH_SIGN_IN               = '/sign-in';
+export const PATH_LOGIN               = '/login';
 export const PATH_OG                    = '/og';
 
 export const PATH_GRID_INFERRED = GRID_HOMEPAGE_ENABLED
@@ -271,6 +272,9 @@ export const isPathTopLevel = (pathname?: string) =>
 
 export const isPathSignIn = (pathname?: string) =>
   checkPathPrefix(pathname, PATH_SIGN_IN);
+
+export const isPathLogin = (pathname?: string) =>
+  checkPathPrefix(pathname, PATH_LOGIN);
 
 export const isPathAdmin = (pathname?: string) =>
   checkPathPrefix(pathname, PATH_ADMIN);

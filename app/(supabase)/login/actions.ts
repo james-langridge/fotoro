@@ -1,27 +1,40 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { createClient } from '@/auth/supabase/server';
+import {
+  KEY_CREDENTIALS_SIGN_IN_ERROR,
+  KEY_CREDENTIALS_SUCCESS,
+} from '@/auth';
 
-import { createClient} from '@/auth/supabase/server';
-
-export async function login(formData: FormData) {
+export async function signInAction(
+  _prevState: string | undefined,
+  formData: FormData,
+) {
   const supabase = await createClient();
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   };
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  try {
+    const { error } = await supabase.auth.signInWithPassword(data);
 
-  if (error) {
-    console.log(error);
-    throw error;
+    if (error) {
+      console.log('Supabase sign in error:', error);
+      return KEY_CREDENTIALS_SIGN_IN_ERROR;
+    }
+
+    revalidatePath('/', 'layout');
+
+    return KEY_CREDENTIALS_SUCCESS;
+  } catch (error) {
+    if (!`${error}`.includes('NEXT_REDIRECT')) {
+      console.log('Unknown sign in error:', {
+        errorText: `${error}`,
+        error,
+      });
+      throw error;
+    }
   }
-
-  revalidatePath('/', 'layout');
-  redirect('/');
 }

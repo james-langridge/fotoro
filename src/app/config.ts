@@ -304,6 +304,7 @@ export const PRIORITY_ORDER_ENABLED =
 export const OG_TEXT_BOTTOM_ALIGNMENT =
   (process.env.NEXT_PUBLIC_OG_TEXT_ALIGNMENT ?? '').toUpperCase() === 'BOTTOM';
 export const ENHANCED_PRIVACY_ENABLED = process.env.NEXT_PUBLIC_ENHANCED_PRIVACY === '1';
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 // INTERNAL
 
