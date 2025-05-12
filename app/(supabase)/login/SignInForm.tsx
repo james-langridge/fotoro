@@ -35,7 +35,7 @@ export default function SignInForm({
   const params = useSearchParams();
   const router = useRouter();
 
-  const { setSupabaseEmail } = useAppState();
+  const { setSupabaseUser } = useAppState();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,27 +47,32 @@ export default function SignInForm({
     return () => clearTimeout(timeout);
   }, []);
 
-  useEffect(() => {
-    if (response === KEY_CREDENTIALS_SUCCESS) {
-      setSupabaseEmail?.(email);
-      router.push(PATH_ROOT);
-    }
-  }, [setSupabaseEmail, response, email, router]);
+  async function getSupabaseUser() {
+    const supabase = await createClient();
+    const {data: {user}} = await supabase.auth.getUser();
+    const email = user?.email ?? undefined;
+    const name = user?.user_metadata.display_name ?? undefined;
+    return {email, name};
+  }
 
   useEffect(() => {
-    async function getUserEmail() {
-      const supabase = await createClient();
-      const {data: {user}} = await supabase.auth.getUser();
-      return user?.email ?? undefined;
+    if (response === KEY_CREDENTIALS_SUCCESS) {
+      getSupabaseUser().then(user => {
+        setSupabaseUser?.(user);
+      });
+      router.push(PATH_ROOT);
     }
+  }, [response, email, router, setSupabaseUser]);
+
+  // todo consider why do this?
+  useEffect(() => {
     return () => {
       // Capture user email before unmounting
-      getUserEmail().then(email => {
-        console.log('Setting user email:', email);
-        setSupabaseEmail?.(email);
+      getSupabaseUser().then(user => {
+        setSupabaseUser?.(user);
       });
     };
-  }, [setSupabaseEmail]);
+  }, [setSupabaseUser]);
 
   const isFormValid =
     email.length > 0 &&

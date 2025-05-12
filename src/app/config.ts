@@ -277,6 +277,7 @@ export const SHOW_SOCIAL =
 export const SHOW_REPO_LINK =
   process.env.NEXT_PUBLIC_HIDE_REPO_LINK !== '1';
 export const SHOW_SIGN_OUT_BOTTOM = process.env.NEXT_PUBLIC_SHOW_SIGN_OUT_TOP !== '1';
+export const HIDE_COMMENTS = process.env.NEXT_PUBLIC_SHOW_COMMENTS !== '1';
 
 // GRID
 

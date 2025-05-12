@@ -77,8 +77,8 @@ export default function AppStateProvider({
   // AUTH
   const [userEmail, setUserEmail] =
     useState<string>();
-  const [supabaseEmail, setSupabaseEmail] =
-        useState<string>();
+  const [supabaseUser, setSupabaseUser] =
+        useState<{email?: string, name?: string}>();
   const [userEmailEager, setUserEmailEager] =
     useState<string>();
   // ADMIN
@@ -132,7 +132,11 @@ export default function AppStateProvider({
       const supabase = await createClient();
       const {data: {user}} = await supabase.auth.getUser();
       const email = user?.email ?? undefined;
-      setSupabaseEmail(email);
+      const name = user?.user_metadata.display_name ?? undefined;
+      setSupabaseUser({
+        name,
+        email,
+      });
     }
     getSupabaseUser();
   }, []);
@@ -234,8 +238,8 @@ export default function AppStateProvider({
         // AUTH
         isCheckingAuth,
         userEmail,
-        supabaseEmail,
-        setSupabaseEmail,
+        supabaseUser,
+        setSupabaseUser,
         userEmailEager,
         setUserEmail,
         isUserSignedIn,

@@ -1,5 +1,6 @@
 'use client';
 
+import PhotoComments from '@/comment/PhotoComments';
 import {
   Photo,
   altTextForPhoto,
@@ -30,7 +31,7 @@ import {
   ALLOW_PUBLIC_DOWNLOADS,
   SHOW_TAKEN_AT_TIME,
   MATTE_COLOR,
-  MATTE_COLOR_DARK,
+  MATTE_COLOR_DARK, HIDE_COMMENTS,
 } from '@/app/config';
 import AdminPhotoMenu from '@/admin/AdminPhotoMenu';
 import { RevalidatePhoto } from './InfinitePhotoScroll';
@@ -473,6 +474,12 @@ export default function PhotoLarge({
                   </div>
                 </div>
               </div>
+              {!HIDE_COMMENTS && (
+                <PhotoComments
+                  photoId={photo.id}
+                  className="col-span-2 sm:col-span-1 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+                />
+              )}
             </DivDebugBaselineGrid>
           </MaskedScroll>
         </div>}

@@ -1,3 +1,5 @@
+// src/comment/index.ts
+
 export interface CommentDb {
     id: string;
     photo_id: string;
@@ -36,8 +38,13 @@ export const parseCommentFromDb = (dbComment: CommentDb): Comment => ({
   photoId: dbComment.photo_id,
   content: dbComment.content,
   commenterName: dbComment.commenter_name,
-  createdAt: dbComment.created_at,
-  updatedAt: dbComment.updated_at,
+  // Convert date strings back to Date objects if they're strings
+  createdAt: typeof dbComment.created_at === 'string'
+    ? new Date(dbComment.created_at)
+    : dbComment.created_at,
+  updatedAt: typeof dbComment.updated_at === 'string'
+    ? new Date(dbComment.updated_at)
+    : dbComment.updated_at,
 });
 
 // Convert Comment back to database format for updates

@@ -38,7 +38,7 @@ export default function Nav({
 }: {
   navTitleOrDomain: string;
 }) {
-  const { userEmail, userEmailEager, isCheckingAuth, clearAuthStateAndRedirectIfNecessary, supabaseEmail } = useAppState();
+  const { userEmail, userEmailEager, isCheckingAuth, clearAuthStateAndRedirectIfNecessary, supabaseUser } = useAppState();
 
   const ref = useRef<HTMLElement>(null);
 
@@ -109,10 +109,10 @@ export default function Nav({
                             {NAV_CAPTION}
                           </div>}
               </div> : ENHANCED_PRIVACY_ENABLED ? <div className="flex gap-x-3 xs:gap-x-4 grow flex-wrap">
-                {supabaseEmail
+                {supabaseUser
                           && <>
                             <div className="truncate max-w-full">
-                              {supabaseEmail}
+                              {supabaseUser.email}
                             </div>
                             <form action={() => signOut()}>
                               <SubmitButtonWithStatus styleAs="link">
