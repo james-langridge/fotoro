@@ -1,6 +1,6 @@
 # Fotoro
 
-This is a clone of https://github.com/sambecker/exif-photo-blog with changes designed for private family photos, including enhanced security and privacy, and comments.
+This is a clone of https://github.com/sambecker/exif-photo-blog with changes designed for private family photos, including enhanced security and privacy, and comments.  Name inspired by the Studio Ghibli film, My Neighbour `Totoro` and the Spanish word for photo: `foto`.
 
 ✨&nbsp;&nbsp;Additional Features
 -
@@ -42,6 +42,14 @@ This just works if you set `NEXT_PUBLIC_SHOW_COMMENTS=1`
 - `NEXT_PUBLIC_HIDE_ZOOM_CONTROLS=1`: hide the zoom control. 
 - `NEXT_PUBLIC_SHOW_COMMENTS=1`: allow users to leave comments on photos. 
 - `NEXT_PUBLIC_SHOW_SIGN_OUT_TOP=1`: this shows the user's email and sign out button at the top of the screen, which I prefer.
+
+🔁&nbsp;&nbsp;Syncing with exif-photo-blog
+-
+If you clone this repository and want to keep up to date with changes in the original `exif-photo-blog`:
+- Add `exif-photo-blog` as a remote: `git remote add upstream git@github.com:sambecker/exif-photo-blog.git`
+- Fetches changes: `git fetch upstream`
+- Make sure you're on your main branch: `git checkout main`
+- Merge the changes: `git merge upstream/main` (or rebase them: `git rebase upstream/main`)
 
 ✅&nbsp;&nbsp;Core changes
 -
