@@ -1,9 +1,8 @@
 import { Photo, PhotoDateRange } from '@/photo';
 import { absolutePathForRecipeImage, pathForRecipe } from '@/app/paths';
-import OGTile from '@/components/OGTile';
+import OGTile, { OGLoadingState } from '@/components/OGTile';
 import { descriptionForRecipePhotos, titleForRecipe } from '.';
-
-export type OGLoadingState = 'unloaded' | 'loading' | 'loaded' | 'failed';
+import { useAppText } from '@/i18n/state/client';
 
 export default function RecipeOGTile({
   recipe,
@@ -26,10 +25,17 @@ export default function RecipeOGTile({
   count?: number
   dateRange?: PhotoDateRange
 }) {
+  const appText = useAppText();
   return (
     <OGTile {...{
-      title: titleForRecipe(recipe, photos, count),
-      description: descriptionForRecipePhotos(photos, true, count, dateRange),
+      title: titleForRecipe(recipe, photos, appText, count),
+      description: descriptionForRecipePhotos(
+        photos,
+        appText,
+        true,
+        count,
+        dateRange,
+      ),
       path: pathForRecipe(recipe),
       pathImageAbsolute: absolutePathForRecipeImage(recipe),
       loadingState: loadingStateExternal,

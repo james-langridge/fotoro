@@ -20,11 +20,11 @@ export const TEMPLATE_DESCRIPTION = 'Store photos with original camera data';
 export const TEMPLATE_REPO_OWNER  = 'sambecker';
 export const TEMPLATE_REPO_NAME   = 'exif-photo-blog';
 export const TEMPLATE_REPO_BRANCH = 'main';
-// eslint-disable-next-line max-len
-export const TEMPLATE_REPO_URL = `https://github.com/${TEMPLATE_REPO_OWNER}/${TEMPLATE_REPO_NAME}`;
+export const TEMPLATE_REPO_URL =
+  `https://github.com/${TEMPLATE_REPO_OWNER}/${TEMPLATE_REPO_NAME}`;
 export const TEMPLATE_REPO_URL_FORK = `${TEMPLATE_REPO_URL}/fork`;
-// eslint-disable-next-line max-len
-export const TEMPLATE_REPO_URL_README = `${TEMPLATE_REPO_URL}?tab=readme-ov-file`;
+export const TEMPLATE_REPO_URL_README =
+  `${TEMPLATE_REPO_URL}?tab=readme-ov-file`;
 
 export const VERCEL_GIT_PROVIDER =
   process.env.NEXT_PUBLIC_VERCEL_GIT_PROVIDER;
@@ -97,6 +97,8 @@ export const getBaseUrl = (share?: boolean) =>
 const SITE_DOMAIN_SHORT = shortenUrl(SITE_DOMAIN);
 
 // SITE META
+
+export const APP_LOCALE = process.env.NEXT_PUBLIC_LOCALE || 'US-EN';
 
 export const NAV_TITLE =
   process.env.NEXT_PUBLIC_NAV_TITLE;
@@ -341,13 +343,14 @@ export const APP_CONFIGURATION = {
     Boolean(process.env.ADMIN_EMAIL) &&
     Boolean(process.env.ADMIN_PASSWORD)
   ),
-  // Domain
+  // Content
+  locale: APP_LOCALE,
+  hasLocale: Boolean(process.env.NEXT_PUBLIC_LOCALE),
   hasDomain: Boolean(
     process.env.NEXT_PUBLIC_DOMAIN ||
     // Legacy environment variable
     process.env.NEXT_PUBLIC_SITE_DOMAIN,
   ),
-  // Content
   hasNavTitle: Boolean(NAV_TITLE),
   hasNavCaption: Boolean(NAV_CAPTION),
   isMetaTitleConfigured: IS_META_TITLE_CONFIGURED,

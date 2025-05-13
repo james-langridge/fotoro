@@ -26,6 +26,7 @@ import IconFavs from '@/components/icons/IconFavs';
 import IconEdit from '@/components/icons/IconEdit';
 import { photoNeedsToBeSynced } from '@/photo/sync';
 import { KEY_COMMANDS } from '@/photo/key-commands';
+import { useAppText } from '@/i18n/state/client';
 
 export default function AdminPhotoMenu({
   photo,
@@ -41,6 +42,8 @@ export default function AdminPhotoMenu({
 }) {
   const { isUserSignedIn, registerAdminUpdate } = useAppState();
 
+  const appText = useAppText();
+
   const isFav = isPhotoFav(photo);
   const path = usePathname();
   const shouldRedirectFav = isPathFavs(path) && isFav;
@@ -48,7 +51,7 @@ export default function AdminPhotoMenu({
 
   const sectionMain = useMemo(() => {
     const items: ComponentProps<typeof MoreMenuItem>[] = [{
-      label: 'Edit',
+      label: appText.admin.edit,
       icon: <IconEdit
         size={15}
         className="translate-x-[0.5px]"
@@ -58,7 +61,7 @@ export default function AdminPhotoMenu({
     }];
     if (includeFavorite) {
       items.push({
-        label: isFav ? 'Unfavorite' : 'Favorite',
+        label: isFav ? appText.admin.unfavorite : appText.admin.favorite,
         icon: <IconFavs
           size={14}
           className="translate-x-[-1px] translate-y-[0.5px]"
@@ -76,7 +79,7 @@ export default function AdminPhotoMenu({
       });
     }
     items.push({
-      label: 'Download',
+      label: appText.admin.download,
       icon: <MdOutlineFileDownload
         size={17}
         className="translate-x-[-1px]"
@@ -86,9 +89,9 @@ export default function AdminPhotoMenu({
       ...showKeyCommands && { keyCommand: KEY_COMMANDS.download },
     });
     items.push({
-      label: 'Sync',
+      label: appText.admin.sync,
       labelComplex: <span className="inline-flex items-center gap-2">
-        <span>Sync</span>
+        <span>{appText.admin.sync}</span>
         {photoNeedsToBeSynced(photo) &&
           <InsightsIndicatorDot
             colorOverride="blue"
@@ -106,6 +109,7 @@ export default function AdminPhotoMenu({
 
     return items;
   }, [
+    appText,
     photo,
     showKeyCommands,
     includeFavorite,
@@ -115,7 +119,7 @@ export default function AdminPhotoMenu({
   ]);
 
   const sectionDelete: ComponentProps<typeof MoreMenuItem>[] = useMemo(() => [{
-    label: 'Delete',
+    label: appText.admin.delete,
     icon: <BiTrash
       size={15}
       className="translate-x-[-1px]"
@@ -123,7 +127,7 @@ export default function AdminPhotoMenu({
     className: 'text-error *:hover:text-error',
     color: 'red',
     action: () => {
-      if (confirm(deleteConfirmationTextForPhoto(photo))) {
+      if (confirm(deleteConfirmationTextForPhoto(photo, appText))) {
         return deletePhotoAction(
           photo.id,
           photo.url,
@@ -139,6 +143,7 @@ export default function AdminPhotoMenu({
       keyCommand: KEY_COMMANDS.delete[1],
     },
   }], [
+    appText,
     photo,
     showKeyCommands,
     revalidatePhoto,

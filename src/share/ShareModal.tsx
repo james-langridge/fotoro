@@ -14,6 +14,7 @@ import { useAppState } from '@/state/AppState';
 import useOnPathChange from '@/utility/useOnPathChange';
 import { IoArrowUp } from 'react-icons/io5';
 import MaskedScroll from '@/components/MaskedScroll';
+import { useAppText } from '@/i18n/state/client';
 
 export default function ShareModal({
   title,
@@ -34,6 +35,8 @@ export default function ShareModal({
     setShareModalProps,
     setShouldRespondToKeyboardCommands,
   } = useAppState();
+
+  const appText = useAppText();
 
   useEffect(() => {
     setShouldRespondToKeyboardCommands?.(false);
@@ -96,7 +99,7 @@ export default function ShareModal({
               <BiCopy size={18} />,
               () => {
                 navigator.clipboard.writeText(pathShare);
-                toastSuccess('Link to photo copied');
+                toastSuccess(appText.photo.copied);
               },
               true,
             )}

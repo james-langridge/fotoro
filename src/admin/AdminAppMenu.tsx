@@ -29,6 +29,7 @@ import IconBroom from '@/components/icons/IconBroom';
 import InsightsIndicatorDot from './insights/InsightsIndicatorDot';
 import MoreMenuItem from '@/components/more/MoreMenuItem';
 import Spinner from '@/components/Spinner';
+import { useAppText } from '@/i18n/state/client';
 
 export default function AdminAppMenu({
   active,
@@ -57,6 +58,8 @@ export default function AdminAppMenu({
     clearAuthStateAndRedirectIfNecessary,
   } = useAppState();
 
+  const appText = useAppText();
+
   const isSelecting = selectedPhotoIds !== undefined;
 
   const isAltPressed = useIsKeyBeingPressed('alt');
@@ -65,7 +68,7 @@ export default function AdminAppMenu({
 
   const sectionUpload: ComponentProps<typeof MoreMenuItem>[] =
     useMemo(() => ([{
-      label: 'Upload Photos',
+      label: appText.admin.uploadPhotos,
       icon: <IconUpload
         size={15}
         className="translate-x-[0.5px] translate-y-[0.5px]"
@@ -73,14 +76,14 @@ export default function AdminAppMenu({
       annotation: isLoadingAdminData &&
         <Spinner className="translate-y-[1.5px]" />,
       action: startUpload,
-    }]), [isLoadingAdminData, startUpload]);
+    }]), [appText, isLoadingAdminData, startUpload]);
 
   const sectionMain: ComponentProps<typeof MoreMenuItem>[] = useMemo(() => {
     const items: ComponentProps<typeof MoreMenuItem>[] = [];
 
     if (uploadsCount) {
       items.push({
-        label: 'Uploads',
+        label: appText.admin.uploadPlural,
         annotation: `${uploadsCount}`,
         icon: <IconFolder
           size={16}
@@ -91,13 +94,14 @@ export default function AdminAppMenu({
     }
     if (photosCountNeedSync) {
       items.push({
-        label: 'Updates',
+        label: appText.admin.updatePlural,
         annotation: <>
           <span className="mr-3">
             {photosCountNeedSync}
           </span>
           <InsightsIndicatorDot
             className="inline-block translate-y-[-1px]"
+            colorOverride="blue"
             size="small"
           />
         </>,
@@ -110,7 +114,7 @@ export default function AdminAppMenu({
     }
     if (photosCountTotal) {
       items.push({
-        label: 'Manage Photos',
+        label: appText.admin.managePhotos,
         ...photosCountTotal && {
           annotation: `${photosCountTotal}`,
         },
@@ -123,7 +127,7 @@ export default function AdminAppMenu({
     }
     if (tagsCount) {
       items.push({
-        label: 'Manage Tags',
+        label: appText.admin.manageTags,
         annotation: `${tagsCount}`,
         icon: <IconTag
           size={15}
@@ -134,7 +138,7 @@ export default function AdminAppMenu({
     }
     if (recipesCount) {
       items.push({
-        label: 'Manage Recipes',
+        label: appText.admin.manageRecipes,
         annotation: `${recipesCount}`,
         icon: <IconRecipe
           size={17}
@@ -146,8 +150,8 @@ export default function AdminAppMenu({
     if (photosCountTotal) {
       items.push({
         label: isSelecting
-          ? 'Exit Batch Edit'
-          : 'Batch Edit ...',
+          ? appText.admin.batchExitEdit
+          : appText.admin.batchEditShort,
         icon: isSelecting
           ? <IoCloseSharp
             size={18}
@@ -173,8 +177,8 @@ export default function AdminAppMenu({
     }
     items.push({
       label: showAppInsightsLink
-        ? 'App Insights'
-        : 'App Configuration',
+        ? appText.admin.appInsights
+        : appText.admin.appConfig,
       icon: <AdminAppInfoIcon
         size="small"
         className="translate-x-[-0.5px] translate-y-[0.5px]"
@@ -186,6 +190,7 @@ export default function AdminAppMenu({
 
     return items;
   }, [
+    appText,
     isSelecting,
     photosCountNeedSync,
     photosCountTotal,
@@ -198,10 +203,10 @@ export default function AdminAppMenu({
 
   const sectionSignOut: ComponentProps<typeof MoreMenuItem>[] =
     useMemo(() => ([{
-      label: 'Sign Out',
+      label: appText.auth.signOut,
       icon: <IconSignOut size={15} />,
       action: () => signOutAction().then(clearAuthStateAndRedirectIfNecessary),
-    }]), [clearAuthStateAndRedirectIfNecessary]);
+    }]), [appText.auth.signOut, clearAuthStateAndRedirectIfNecessary]);
 
   const sections = useMemo(() =>
     [sectionUpload, sectionMain, sectionSignOut]
