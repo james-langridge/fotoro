@@ -8,6 +8,7 @@ import {
 } from '@/utility/string';
 import { FujifilmRecipe } from '@/platforms/fujifilm/recipe';
 import { labelForFilm } from '@/film';
+import { AppTextState } from '@/i18n/state';
 
 export type RecipeWithCount = {
   recipe: string
@@ -30,23 +31,29 @@ export const formatRecipe = (recipe?: string) =>
 export const titleForRecipe = (
   recipe: string,
   photos:Photo[] = [],
+  appText: AppTextState,
   explicitCount?: number,
 ) => [
-  `Recipe: ${formatRecipe(recipe)}`,
-  photoQuantityText(explicitCount ?? photos.length),
+  `${appText.category.recipe}: ${formatRecipe(recipe)}`,
+  photoQuantityText(explicitCount ?? photos.length, appText),
 ].join(' ');
 
-export const shareTextForRecipe = (recipe: string) =>
-  `${formatRecipe(recipe)} recipe photos`;
+export const shareTextForRecipe = (
+  recipe: string,
+  appText: AppTextState,
+) =>
+  appText.category.recipeShare(formatRecipe(recipe));
 
 export const descriptionForRecipePhotos = (
   photos: Photo[] = [],
+  appText: AppTextState,
   dateBased?: boolean,
   explicitCount?: number,
   explicitDateRange?: PhotoDateRange,
 ) =>
   descriptionForPhotoSet(
     photos,
+    appText,
     undefined,
     dateBased,
     explicitCount,
@@ -138,13 +145,20 @@ export const generateRecipeText = (
 export const generateMetaForRecipe = (
   recipe: string,
   photos: Photo[],
+  appText: AppTextState,
   explicitCount?: number,
   explicitDateRange?: PhotoDateRange,
 ) => ({
   url: absolutePathForRecipe(recipe),
-  title: titleForRecipe(recipe, photos, explicitCount),
+  title: titleForRecipe(recipe, photos, appText, explicitCount),
   description:
-    descriptionForRecipePhotos(photos, true, explicitCount, explicitDateRange),
+    descriptionForRecipePhotos(
+      photos,
+      appText,
+      true,
+      explicitCount,
+      explicitDateRange,
+    ),
   images: absolutePathForRecipeImage(recipe),
 });
 

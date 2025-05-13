@@ -1,3 +1,4 @@
+import { useAppText } from '@/i18n/state/client';
 import { toastWaiting } from '@/toast';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useTransition } from 'react';
@@ -6,7 +7,7 @@ import { toast } from 'sonner';
 
 export default function useNavigateOrRunActionWithToast({
   pathOrAction,
-  toastMessage = 'Loading...',
+  toastMessage: _toastMessage,
   dismissDelay = 1500,
 }: {
   pathOrAction?: string | (() => Promise<any> | undefined)
@@ -14,6 +15,10 @@ export default function useNavigateOrRunActionWithToast({
   dismissDelay?: number
 }) {
   const router = useRouter();
+
+  const appText = useAppText();
+
+  const toastMessage = _toastMessage ?? appText.misc.loading;
 
   const toastId = useRef<string | number>(undefined);
   

@@ -21,6 +21,7 @@ import useKeydownHandler from '@/utility/useKeydownHandler';
 import { usePathname } from 'next/navigation';
 import { KEY_COMMANDS } from '@/photo/key-commands';
 import AppViewSwitcherEnhanced from '@/app/AppViewSwitcherEnhanced';
+import { useAppText } from '@/i18n/state/client';
 
 export type SwitcherSelection = 'feed' | 'grid' | 'admin';
 
@@ -32,6 +33,8 @@ export default function AppViewSwitcher({
   className?: string
 }) {
   const pathname = usePathname();
+
+  const appText = useAppText();
 
   const {
     isUserSignedIn,
@@ -69,30 +72,30 @@ export default function AppViewSwitcher({
   }
 
   const renderItemFeed =
-      <SwitcherItem
-        icon={<IconFeed includeTitle={false} />}
-        href={PATH_FEED_INFERRED}
-        hrefRef={refHrefFeed}
-        active={currentSelection === 'feed'}
-        tooltip={{...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-          content: 'Feed',
-          keyCommand: KEY_COMMANDS.feed,
-        }}}
-        noPadding
-      />;
+    <SwitcherItem
+      icon={<IconFeed includeTitle={false} />}
+      href={PATH_FEED_INFERRED}
+      hrefRef={refHrefFeed}
+      active={currentSelection === 'feed'}
+      tooltip={{...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
+        content: appText.nav.feed,
+        keyCommand: KEY_COMMANDS.feed,
+      }}}
+      noPadding
+    />;
 
   const renderItemGrid =
-      <SwitcherItem
-        icon={<IconGrid includeTitle={false} />}
-        href={PATH_GRID_INFERRED}
-        hrefRef={refHrefGrid}
-        active={currentSelection === 'grid'}
-        tooltip={{...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-          content: 'Grid',
-          keyCommand: KEY_COMMANDS.grid,
-        }}}
-        noPadding
-      />;
+    <SwitcherItem
+      icon={<IconGrid includeTitle={false} />}
+      href={PATH_GRID_INFERRED}
+      hrefRef={refHrefGrid}
+      active={currentSelection === 'grid'}
+      tooltip={{...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
+        content: appText.nav.grid,
+        keyCommand: KEY_COMMANDS.grid,
+      }}}
+      noPadding
+    />;
 
   return (
     <div
@@ -106,38 +109,38 @@ export default function AppViewSwitcher({
         {GRID_HOMEPAGE_ENABLED ? renderItemFeed : renderItemGrid}
         {/* Show spinner if admin is suspected to be logged in */}
         {(isUserSignedInEager && !isUserSignedIn) &&
-              <SwitcherItem
-                icon={<Spinner />}
-                isInteractive={false}
-                noPadding
-                tooltip={{
-                  ...!isAdminMenuOpen && SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-                    content: 'Admin Menu',
-                    keyCommand: KEY_COMMANDS.admin,
-                  },
-                }}
-              />}
+          <SwitcherItem
+            icon={<Spinner />}
+            isInteractive={false}
+            noPadding
+            tooltip={{
+              ...!isAdminMenuOpen && SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
+                content: appText.nav.admin,
+                keyCommand: KEY_COMMANDS.admin,
+              },
+            }}
+          />}
         {isUserSignedIn &&
-              <SwitcherItem
-                icon={<AdminAppMenu
-                  isOpen={isAdminMenuOpen}
-                  setIsOpen={setIsAdminMenuOpen}
-                />}
-                tooltip={{
-                  ...!isAdminMenuOpen && SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-                    content: 'Admin Menu',
-                    keyCommand: KEY_COMMANDS.admin,
-                  },
-                }}
-                noPadding
-              />}
+          <SwitcherItem
+            icon={<AdminAppMenu
+              isOpen={isAdminMenuOpen}
+              setIsOpen={setIsAdminMenuOpen}
+            />}
+            tooltip={{
+              ...!isAdminMenuOpen && SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
+                content: appText.nav.admin,
+                keyCommand: KEY_COMMANDS.admin,
+              },
+            }}
+            noPadding
+          />}
       </Switcher>
       <Switcher type="borderless">
         <SwitcherItem
           icon={<IconSearch includeTitle={false} />}
           onClick={() => setIsCommandKOpen?.(true)}
           tooltip={{...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-            content: 'Search',
+            content: appText.nav.search,
             keyCommandModifier: KEY_COMMANDS.search[0],
             keyCommand: KEY_COMMANDS.search[1],
           }}}

@@ -17,13 +17,14 @@ import {
   formatExposureCompensation,
   formatExposureTime,
 } from '@/utility/exif-format';
-import { parameterize } from '@/utility/string';
+import { capitalize, parameterize } from '@/utility/string';
 import camelcaseKeys from 'camelcase-keys';
 import { isBefore } from 'date-fns';
 import type { Metadata } from 'next';
 import { FujifilmRecipe } from '@/platforms/fujifilm/recipe';
 import { FujifilmSimulation } from '@/platforms/fujifilm/simulation';
 import { PhotoSyncStatus, generatePhotoSyncStatus } from './sync';
+import { AppTextState } from '@/i18n/state';
 
 // INFINITE SCROLL: FEED
 export const INFINITE_SCROLL_FEED_INITIAL =
@@ -171,7 +172,7 @@ export const photoStatsAsString = (photo: Photo) => [
 ].join(' ');
 
 export const descriptionForPhoto = (photo: Photo) =>
-  photo.takenAtNaiveFormatted?.toUpperCase();
+  formatDate({ date: photo.takenAt }).toLocaleUpperCase();
 
 export const getPreviousPhoto = (photo: Photo, photos: Photo[]) => {
   const index = photos.findIndex(p => p.id === photo.id);
@@ -231,38 +232,54 @@ export const titleForPhoto = (
 export const altTextForPhoto = (photo: Photo) =>
   photo.semanticDescription || titleForPhoto(photo);
 
-export const photoLabelForCount = (count: number, capitalize = true) =>
-  capitalize
-    ? count === 1 ? 'Photo' : 'Photos'
-    : count === 1 ? 'photo' : 'photos';
+export const photoLabelForCount = (
+  count: number,
+  appText: AppTextState,
+  _capitalize = true,
+) => {
+  const label = count === 1
+    ? appText.photo.photo
+    : appText.photo.photoPlural;
+  return _capitalize
+    ? capitalize(label)
+    : label;
+};
 
 export const photoQuantityText = (
   count: number,
+  appText: AppTextState,
   includeParentheses = true,
   capitalize?: boolean,
 ) =>
   includeParentheses
-    ? `(${count} ${photoLabelForCount(count, capitalize)})`
-    : `${count} ${photoLabelForCount(count, capitalize)}`;  
+    ? `(${count} ${photoLabelForCount(count, appText, capitalize)})`
+    : `${count} ${photoLabelForCount(count, appText, capitalize)}`;  
 
-export const deleteConfirmationTextForPhoto = (photo: Photo) =>
-  `Are you sure you want to delete "${titleForPhoto(photo)}?"`;
+export const deleteConfirmationTextForPhoto = (
+  photo: Photo,
+  appText: AppTextState,
+) =>
+  appText.admin.deleteConfirm(titleForPhoto(photo));
 
 export type PhotoDateRange = { start: string, end: string };
 
 export const descriptionForPhotoSet = (
   photos:Photo[] = [],
+  appText: AppTextState,
   descriptor?: string,
   dateBased?: boolean,
   explicitCount?: number,
   explicitDateRange?: PhotoDateRange,
 ) =>
   dateBased
-    ? dateRangeForPhotos(photos, explicitDateRange).description.toUpperCase()
+    ? dateRangeForPhotos(photos, explicitDateRange)
+      .description
+      .toLocaleUpperCase()
     : [
-      explicitCount ?? photos.length,
-      descriptor,
-      photoLabelForCount(explicitCount ?? photos.length, false),
+      explicitCount ?? photos.length, (
+        descriptor ||
+        photoLabelForCount(explicitCount ?? photos.length, appText, false)
+      ),
     ].join(' ');
 
 const sortPhotosByDateNonDestructively = (

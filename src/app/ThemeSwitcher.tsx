@@ -5,8 +5,11 @@ import { useTheme } from 'next-themes';
 import Switcher from '@/components/Switcher';
 import SwitcherItem from '@/components/SwitcherItem';
 import { BiDesktop, BiMoon, BiSun } from 'react-icons/bi';
+import { useAppText } from '@/i18n/state/client';
 
 export default function ThemeSwitcher () {
+  const appText = useAppText();
+
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -25,19 +28,19 @@ export default function ThemeSwitcher () {
         icon={<BiDesktop size={16} />}
         onClick={() => setTheme('system')}
         active={theme === 'system'}
-        tooltip={{ content: 'System' }}
+        tooltip={{ content: appText.theme.system }}
       />
       <SwitcherItem
         icon={<BiSun size={18} />}
         onClick={() => setTheme('light')}
         active={theme === 'light'}
-        tooltip={{ content: 'Light Mode' }}
+        tooltip={{ content: appText.theme.light }}
       />
       <SwitcherItem
         icon={<BiMoon size={16} />}
         onClick={() => setTheme('dark')}
         active={theme === 'dark'}
-        tooltip={{ content: 'Dark Mode' }}
+        tooltip={{ content: appText.theme.dark }}
       />
     </Switcher>
   );

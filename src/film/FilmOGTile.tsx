@@ -1,12 +1,13 @@
+'use client';
+
 import { Photo, PhotoDateRange } from '@/photo';
 import {
   absolutePathForFilmImage,
   pathForFilm,
 } from '@/app/paths';
-import OGTile from '@/components/OGTile';
+import OGTile, { OGLoadingState } from '@/components/OGTile';
 import { descriptionForFilmPhotos, titleForFilm } from '.';
-
-export type OGLoadingState = 'unloaded' | 'loading' | 'loaded' | 'failed';
+import { useAppText } from '@/i18n/state/client';
 
 export default function FilmOGTile({
   film,
@@ -29,11 +30,12 @@ export default function FilmOGTile({
   count?: number
   dateRange?: PhotoDateRange
 }) {
+  const appText = useAppText();
   return (
     <OGTile {...{
-      title: titleForFilm(film, photos, count),
+      title: titleForFilm(film, photos, appText, count),
       description:
-        descriptionForFilmPhotos(photos, true, count, dateRange),
+        descriptionForFilmPhotos(photos, appText, true, count, dateRange),
       path: pathForFilm(film),
       pathImageAbsolute: absolutePathForFilmImage(film),
       loadingState: loadingStateExternal,

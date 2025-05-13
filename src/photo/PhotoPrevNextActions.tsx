@@ -31,6 +31,7 @@ import { downloadFileFromBrowser } from '@/utility/url';
 import useKeydownHandler from '@/utility/useKeydownHandler';
 import { KEY_COMMANDS } from './key-commands';
 import { syncPhotoConfirmText } from '@/admin/confirm';
+import { useAppText } from '@/i18n/state/client';
 
 const ANIMATION_LEFT: AnimationConfig = { type: 'left', duration: 0.3 };
 const ANIMATION_RIGHT: AnimationConfig = { type: 'right', duration: 0.3 };
@@ -48,6 +49,8 @@ export default function PhotoPrevNextActions({
   hasAiTextGeneration: boolean
 } & PhotoSetCategory) {
   const { setNextPhotoAnimation, isUserSignedIn } = useAppState();
+
+  const appText = useAppText();
 
   const photoTitle = photo
     ? photo.title
@@ -200,7 +203,7 @@ export default function PhotoPrevNextActions({
         '*:select-none',
       )}>
         <Tooltip {...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-          content: 'Previous',
+          content: appText.nav.prev,
           keyCommand: KEY_COMMANDS.prev[0],
         }}>
           <PhotoLink
@@ -213,14 +216,16 @@ export default function PhotoPrevNextActions({
             prefetch
           >
             <FiChevronLeft className="sm:hidden text-[1.1rem]" />
-            <span className="hidden sm:inline-block">PREV</span>
+            <span className="hidden sm:inline-block uppercase">
+              {appText.nav.prevShort}
+            </span>
           </PhotoLink>
         </Tooltip>
         <span className="text-extra-extra-dim">
           /
         </span>
         <Tooltip {...SHOW_KEYBOARD_SHORTCUT_TOOLTIPS && {
-          content: 'Next',
+          content: appText.nav.next,
           keyCommand: KEY_COMMANDS.next[0],
         }}>
           <PhotoLink
@@ -233,7 +238,9 @@ export default function PhotoPrevNextActions({
             prefetch
           >
             <FiChevronRight className="sm:hidden text-[1.1rem]" />
-            <span className="hidden sm:inline-block">NEXT</span>
+            <span className="hidden sm:inline-block uppercase">
+              {appText.nav.nextShort}
+            </span>
           </PhotoLink>
         </Tooltip>
       </div>
