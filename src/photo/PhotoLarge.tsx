@@ -31,7 +31,9 @@ import {
   ALLOW_PUBLIC_DOWNLOADS,
   SHOW_TAKEN_AT_TIME,
   MATTE_COLOR,
-  MATTE_COLOR_DARK, HIDE_COMMENTS,
+  MATTE_COLOR_DARK,
+  HIDE_COMMENTS,
+  SHOULD_SHARE,
 } from '@/app/config';
 import AdminPhotoMenu from '@/admin/AdminPhotoMenu';
 import { RevalidatePhoto } from './InfinitePhotoScroll';
@@ -68,7 +70,7 @@ export default function PhotoLarge({
   showRecipe = true,
   showZoomControls: _showZoomControls = true,
   shouldZoomOnFKeydown = true,
-  shouldShare = false,
+  shouldShare = SHOULD_SHARE,
   shouldShareCamera,
   shouldShareLens,
   shouldShareTag,
